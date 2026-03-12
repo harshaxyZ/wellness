@@ -82,9 +82,17 @@ npm run dev
 - `PUT /api/sessions/:id` - Update session
 - `PATCH /api/sessions/:id/autosave` - Specialized autosave endpoint
 
-### Admin
-- `GET /api/admin/analytics` - System stats
-- `GET /api/admin/users` - All users
-- `PATCH /api/admin/users/:id/block` - Toggle block status
-- `GET /api/admin/sessions` - All sessions for moderation
-- `PATCH /api/admin/sessions/:id/approve` - Publish session
+## Admin Panel Access
+
+By default, all registered users have the `user` role. To access the Admin Dashboard:
+
+1.  Register an account through the app.
+2.  Open your MongoDB shell or a tool like MongoDB Compass.
+3.  In the `wellness-platform` database, find your user in the `users` collection.
+4.  Change the `role` field from `"user"` to `"admin"`.
+5.  Log out and log back in. The **Admin** section will now be visible in the sidebar.
+
+Through the Admin Dashboard, you can:
+- **Overview**: View platform-wide analytics and charts.
+- **Users**: Block or delete users (Admins cannot be blocked/deleted).
+- **Moderation**: Approve draft sessions or move published sessions back to draft.
