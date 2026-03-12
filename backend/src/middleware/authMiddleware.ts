@@ -1,11 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import User from '../models/User';
-
-interface DecodedToken {
-  id: string;
-  role: string;
-}
+import { Response, NextFunction } from 'express';
+import { auth, db } from '../lib/firebase';
 
 export const protect = async (req: any, res: Response, next: NextFunction) => {
   let token;
@@ -16,26 +10,35 @@ export const protect = async (req: any, res: Response, next: NextFunction) => {
   ) {
     try {
       token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET || 'secret'
-      ) as DecodedToken;
-
-      req.user = await User.findById(decoded.id).select('-passwordHash');
+      const decodedToken = await auth.verifyIdToken(token);
       
-      if (!req.user) {
-         res.status(401).json({ message: 'Not authorized, user not found' });
-         return;
-      }
-
-      if (req.user.isBlocked) {
-         res.status(403).json({ message: 'User is blocked' });
-         return;
+      // Fetch user role and block status from Firestore
+      const userDoc = await db.collection('users').doc(decodedToken.uid).get();
+      
+      if (!userDoc.exists) {
+        // If user document doesn't exist, create it with default role
+        const userData = {
+          uid: decodedToken.uid,
+          name: decodedToken.name || 'Anonymous',
+          email: decodedToken.email,
+          role: 'user',
+          isBlocked: false,
+          createdAt: new Date(),
+        };
+        await db.collection('users').doc(decodedToken.uid).set(userData);
+        req.user = userData;
+      } else {
+        const userData = userDoc.data();
+        if (userData?.isBlocked) {
+          res.status(403).json({ message: 'User is blocked' });
+          return;
+        }
+        req.user = userData;
       }
 
       next();
     } catch (error) {
-      console.error(error);
+      console.error('Auth Error:', error);
       res.status(401).json({ message: 'Not authorized, token failed' });
     }
   }

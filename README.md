@@ -1,98 +1,68 @@
-# Wellness Session Management Platform
+# Wellness Session Management Platform (Firebase Edition)
 
-A production-ready full-stack platform for managing and moderating wellness sessions, built with Next.js, Node.js, and MongoDB.
+A production-ready full-stack platform for managing and moderating wellness sessions, migrated to **Firebase** for serverless scalability.
 
 ## Features
 
-- **Robust Authentication**: JWT-based auth with secure password hashing (Bcrypt).
-- **Session Management**: Full CRUD operations for wellness programs.
-- **Advanced Editor**: Session builder with a **5-second debounced autosave** system.
-- **Admin Dashboard**: 
-  - Real-time analytics charts using Recharts.
-  - User management (Block/Delete).
-  - Session moderation (Approve/Reject).
-- **Modern UI**: Dark mode, responsive design, and SaaS aesthetic using ShadCN UI and TailwindCSS.
-- **Security**: Helmet, Rate Limiting, CORS, and role-based authorization.
+- **Firebase Authentication**: Secure login/register with ID token verification.
+- **Firestore Database**: Real-time NoSQL database for users and sessions.
+- **Session Management**: Full CRUD operations with a **5-second debounced autosave**.
+- **Admin Dashboard**: Analytics, user management, and session moderation.
+- **Modern UI**: Dark mode, responsive design with ShadCN UI and TailwindCSS.
 
 ## Tech Stack
 
 ### Frontend
-- Next.js 14 (App Router)
-- TypeScript
-- TailwindCSS
-- ShadCN UI
-- TanStack Query
-- Axios
+- Next.js 14, TypeScript, TailwindCSS, ShadCN UI, TanStack Query, Firebase Client SDK.
 
 ### Backend
-- Node.js & Express.js
-- MongoDB & Mongoose
-- JWT (Authentication)
-- Bcrypt (Hashing)
-- Express-rate-limit & Helmet (Security)
+- Node.js & Express.js, Firebase Admin SDK (Firestore & Auth).
 
 ## Setup Instructions
 
-### 1. MongoDB Setup
-Ensure you have MongoDB installed and running locally on `mongodb://localhost:27017/wellness-platform`.
+### 1. Firebase Project Setup
+1.  Go to [Firebase Console](https://console.firebase.google.com/) and create a new project.
+2.  **Enable Authentication**: Enable Email/Password provider.
+3.  **Enable Firestore**: Create a database in "Production Mode".
+4.  **Backend (Admin SDK)**: 
+    - Go to Project Settings -> Service Accounts -> Generate new private key.
+    - Copy the JSON and minify it to a single string for the `.env` file.
+5.  **Frontend (Client SDK)**:
+    - Go to Project Settings -> General -> Your apps -> Add Web App.
+    - Copy the `firebaseConfig` object for your `.env.local`.
 
 ### 2. Backend Setup
 ```bash
 cd backend
 npm install
 ```
-Create a `.env` file in the `backend` folder:
+Create `.env`:
 ```
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/wellness-platform
-JWT_SECRET=your_jwt_secret_here
-JWT_EXPIRE=7d
+FIREBASE_SERVICE_ACCOUNT='{"type": "service_account", ...}'
 NODE_ENV=development
 ```
-Start the backend server:
-```bash
-npm run dev
-```
+Run: `npm run dev`
 
 ### 3. Frontend Setup
 ```bash
 cd frontend
 npm install
 ```
-Create a `.env.local` file in the `frontend` folder:
+Create `.env.local`:
 ```
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
-Start the frontend development server:
-```bash
-npm run dev
-```
-
-## API Endpoints
-
-### Auth
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `GET /api/auth/me`
-
-### Sessions
-- `GET /api/sessions` - Get user's sessions
-- `POST /api/sessions` - Create new draft
-- `GET /api/sessions/:id` - Get session details
-- `PUT /api/sessions/:id` - Update session
-- `PATCH /api/sessions/:id/autosave` - Specialized autosave endpoint
+Run: `npm run dev`
 
 ## Admin Panel Access
-
-By default, all registered users have the `user` role. To access the Admin Dashboard:
-
-1.  Register an account through the app.
-2.  Open your MongoDB shell or a tool like MongoDB Compass.
-3.  In the `wellness-platform` database, find your user in the `users` collection.
-4.  Change the `role` field from `"user"` to `"admin"`.
-5.  Log out and log back in. The **Admin** section will now be visible in the sidebar.
-
-Through the Admin Dashboard, you can:
-- **Overview**: View platform-wide analytics and charts.
-- **Users**: Block or delete users (Admins cannot be blocked/deleted).
-- **Moderation**: Approve draft sessions or move published sessions back to draft.
+1.  Register an account.
+2.  In Firestore, find your user document in the `users` collection.
+3.  Change `role` to `"admin"`.
+4.  Login again to see the Admin Sidebar.
